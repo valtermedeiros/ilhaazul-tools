@@ -1,0 +1,8 @@
+@font-face {
+    font-family: "Niconne";
+    src: url("../fonts/Niconne-Regular.ttf");
+}
+
+.person-name {
+    font-family: 'Niconne', sans-serif;
+}

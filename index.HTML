@@ -1,0 +1,1764 @@
+<!-- 
+	Copyrights of this project reserved to Adérito Gomes & Valter Medeiros
+	Agência Funerária - agenciafunerariailhaazul@gmail.com
+	
+	! Changes ---------------------------------------------
+	--------------------------------------------------------------------
+	-: Code cleanup (better syntax)
+	-: Removed typos (orações)
+	-: Added function to download image and another to publish via Facebook API
+	-: Added light/dark mode
+	--------------------------------------------------------------------
+
+	TODO ---------------------------------------------
+	--------------------------------------------------------------------
+	-: Replace all external files with local ones to ensure it works forever
+	-: Split functions in .js files for better readability
+	-: Add function to print image and publish via Facebook API
+	--------------------------------------------------------------------
+
+	? Maybes ? ---------------------------------------------
+	--------------------------------------------------------------------
+	-: Image published to Facebook can be .JPEG instead of .PNG to increase speed of upload?
+	--------------------------------------------------------------------
+
+-->
+
+<HTML>
+
+<HEAD>
+	<TITLE>Agência Ilha Azul - Ferramentas</TITLE>
+	<meta charset="UTF-8">
+	<link rel="icon" href="assets/i/logo.svg" type="image/svg+xml">
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+	integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+	crossorigin="anonymous"></script>
+
+	<script src="assets/js/html2canvas.js"></script>
+
+	<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/fontawesome.min.css">
+
+	<link rel="stylesheet" href="assets/css/custom.css">
+
+
+	<style type="text/css">
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		label {
+			font-size: 12px;
+			margin-top: 1em;
+			opacity: 0.5;
+		}
+
+		.nav-link {
+			background: #eee;
+			border-radius: 5px;
+			margin-right: 0.4em;
+		}
+
+		/*----------Text Styles----------*/
+		.ws6 {
+			font-size: 8px;
+		}
+
+		.ws7 {
+			font-size: 9.3px;
+		}
+
+		.ws8 {
+			font-size: 11px;
+		}
+
+		.ws9 {
+			font-size: 12px;
+		}
+
+		.ws10 {
+			font-size: 13px;
+		}
+
+		.ws11 {
+			font-size: 15px;
+		}
+
+		.ws12 {
+			font-size: 16px;
+		}
+
+		.ws14 {
+			font-size: 19px;
+		}
+
+		.ws16 {
+			font-size: 28px;
+		}
+
+		.ws18 {
+			font-size: 100px;
+		}
+
+		.ws20 {
+			font-size: 27px;
+		}
+
+		.ws22 {
+			font-size: 29px;
+		}
+
+		.ws24 {
+			font-size: 32px;
+		}
+
+		.ws26 {
+			font-size: 35px;
+		}
+
+		.ws28 {
+			font-size: 37px;
+		}
+
+		.ws36 {
+			font-size: 48px;
+		}
+
+		.ws48 {
+			font-size: 64px;
+		}
+
+		.ws72 {
+			font-size: 96px;
+		}
+
+		.wpmd {
+			font-size: 13px;
+			font-style: normal;
+			font-weight: normal;
+		}
+
+		/*----------Para Styles----------*/
+		DIV,
+		UL,
+		OL {
+			margin: 0px;
+		}
+
+		p.small {
+			line-height: 90%
+		}
+
+		.theme-dark {
+			filter: invert(1); background: #010101;
+		}
+
+		.theme-light {
+			filter: invert(0); background: #fefefe;
+		}
+
+	</style>
+
+	<script src="assets/js/helper.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<script language=javascript>
+		var Comments = "Comments";
+
+		// Get/Post Cookies
+		function Get_Cookie(name) {
+
+			var start = document.cookie.indexOf(name + "=");
+			var len = start + name.length + 1;
+			if ((!start) && (name != document.cookie.substring(0, name.length))) {
+				return null;
+			}
+			if (start == -1) return null;
+			var end = document.cookie.indexOf(";", len);
+			if (end == -1) {
+				end = document.cookie.length;
+			}
+			return unescape(document.cookie.substring(len, end));
+		}
+
+		function Set_Cookies() {
+			var expires = 365 * 1000 * 60 * 60 * 24;
+			var time = new Date();
+			var expires_date = new Date(time.getTime() + (expires));
+			document.cookie = "Freg = " + escape(document.F.Freg.options[document.F.Freg.selectedIndex].text) +
+				((expires) ? ";expires=" + expires_date.toGMTString() : "");
+			document.cookie = "Nome = " + escape(document.F.Nome.value) +
+				((expires) ? ";expires=" + expires_date.toGMTString() : "");
+			document.cookie = "Ndia = " + escape(document.F.Nday.options[document.F.Nday.selectedIndex].text) +
+				((expires) ? ";expires=" + expires_date.toGMTString() : "");
+			document.cookie = "Nmes = " + escape(document.F.Nmonth.options[document.F.Nmonth.selectedIndex].text) +
+				((expires) ? ";expires=" + expires_date.toGMTString() : "");
+			document.cookie = "Nano = " + escape(document.F.Nyear.options[document.F.Nyear.selectedIndex].text) +
+				((expires) ? ";expires=" + expires_date.toGMTString() : "");
+			document.cookie = "Oracao = " + escape(document.F.Oracao.options[document.F.Oracao.selectedIndex].text) +
+				((expires) ? ";expires=" + expires_date.toGMTString() : "");
+		}
+
+		// Funções de print Pag. 1 a Pag. 5
+		function Pagina1() {
+			var aleft = new Array(3);
+			aleft[0] = 10;
+			aleft[1] = 800;
+			aleft[2] = 114;
+			aleft[3] = 114;
+
+			Index = document.F.Freg.selectedIndex;
+			Freguesia = document.F.Freg.options[Index].text;
+			MyImagem = Freguesia;
+			MyImagem += ".jpg";
+			Index = document.F.Moldura.selectedIndex;
+			Moldura = document.F.Moldura.options[Index].text;
+			//alert(Moldura);	
+			document.write("<style type='text/css' media='print'>");
+			document.write("      body { font: 12pt Times, serif; margin: 0px 0px 0px 0px; }");
+			document.write("</style>");
+			var t = 0;
+			var l = 0;
+			var left = 0;
+			var top = 0;
+			for (var i = 1; i < 5; i++) {
+				switch (i) {
+					case 1:
+						t = 20;
+						l = 10;
+						break;
+					case 2:
+						t = 20;
+						l = 810;
+						break;
+					case 3:
+						t = 590;
+						l = 10;
+						break;
+					case 4:
+						t = 590;
+						l = 810;
+						break;
+
+				}
+				left = l + 60;
+				top = t + 74;
+				document.write("<div id='image1" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:235px; height:189px; z-index:0'><img src='imagens/Logotipo.jpg' border=0 width=235 height=189></a></div>");
+				left = l + 24;
+				top = t + 291;
+				document.write("<div id='text1" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:306px; height:140px; z-index:1'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div align=center><BR></div>");
+				document.write("<div align=center><font class='ws11'><B>Agencia Funeraria Ilha Azul, Lda</B></font></div>");
+				document.write("<div align=center><font class='ws11'><B>Estrada Principe Alberto de M�naco ,14</B></font></div>");
+				document.write("<div align=center><font class='ws11'><B>Angustias - 9900 - 038 Horta</B></font></div>");
+				document.write("<div align=center><font class='ws11'><B><BR></B></font></div>");
+				document.write("<div align=center><font class='ws11'><B>Tef./Fax: 292 293 296</B></font></div>");
+				document.write("<div align=center><font class='ws11'><B>Telemovel: 962 695 212 </B></font></div>");
+				document.write("</div></div>");
+
+				switch (Moldura) {
+					case 'Moderno':
+						left = l + 472;
+						top = t + 96;
+						document.write("<div id='image3" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:216px; height:325px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+						left = l + 426;
+						top = t + 5;
+						document.write("<img border=0 src='imagens/fig_1.bmp' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:310px; height:492px;'>");
+						break;
+					case 'Simples':
+						left = l + 435;
+						top = t + 32;
+						document.write("<div id='image3" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:288px; height:450px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+						left = l + 429;
+						top = t + 26;
+						document.write("<img border=0 src='imagens/round.gif' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:300px; height:462px;'>");
+						break;
+				}
+			}
+			//document.write("<div id='image1' style='position:absolute; overflow:hidden; left:95px; top:15px; width:344px; height:544px; z-index:6'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");	
+			document.close();
+			window.print();
+		}
+
+		function Pagina2() {
+			Index = document.F.Freg.selectedIndex;
+			Fnome = document.F.Nome.value;
+			Fotografia = "../Agencia/Fotos/" + Fnome + ".jpg"
+			//Fotografia = "Fotos/" + Fnome + ".jpg"
+			Index = document.F.Nday.selectedIndex;
+			Dia = document.F.Nday.options[Index].text;
+			Index = document.F.Nmonth.selectedIndex;
+			Mes = document.F.Nmonth.options[Index].text;
+			Index = document.F.Nyear.selectedIndex;
+			Ano = document.F.Nyear.options[Index].text;
+			DataNascimento = "Nasceu a " + Dia + " de " + Mes + " de " + Ano;
+			Index = document.F.Fday.selectedIndex;
+			Dia = document.F.Fday.options[Index].text;
+			Index = document.F.Fmonth.selectedIndex;
+			Mes = document.F.Fmonth.options[Index].text;
+			Index = document.F.Fyear.selectedIndex;
+			Ano = document.F.Fyear.options[Index].text;
+			DataFalecimento = "e Faleceu a " + Dia + " de " + Mes + " de " + Ano;
+
+			var t = 0;
+			var l = 0;
+			var left = 0;
+			var top = 0;
+			for (var i = 1; i < 5; i++) {
+				switch (i) {
+					case 1:
+						t = 10;
+						l = 30;
+						break;
+					case 2:
+						t = 10;
+						l = 1025;
+						break;
+					case 3:
+						t = 710;
+						l = 30;
+						break;
+					case 4:
+						t = 710;
+						l = 1025;
+						break;
+
+				}
+				left = l + 70;
+				top = t + 100;
+				document.write("<div id='Fotografia1' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:220px; height:220px; z-index:4'><img border=0 src='" + Fotografia + "' border=0 width=220 height=220></a></div>");
+
+				left = l + 70;
+				top = t + 350;
+				document.write("<div id='text4" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:425px; height:42px; z-index:1'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div><font class='ws16' style='font-size:23px' color='#3366FF' face='Arial ITC'>Orai pela Alma de :</font></div>");
+				document.write("</div></div>");
+
+				left = l + 90;
+				top = t + 400;
+				document.write("<div id='text2" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:425px; height:42px; z-index:0'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div><font class='ws16' style='font-size:23px' color='#3366FF' face='Arial ITC'>" + Fnome + "</font></div>");
+				document.write("</div></div>");
+
+				left = l + 90;
+				top = t + 425;
+				document.write("<div id='text5" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:425px; height:47px; z-index:2'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div><font class='ws16' style='font-size:23px' color='#3366FF' face='Arial ITC'>" + DataNascimento + "</font></div>");
+				document.write("</div></div>");
+				left = l + 90;
+				top = t + 450;
+				document.write("<div id='text6" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:425px; height:47px; z-index:3'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div><font class='ws16' style='font-size:23px' color='#3366FF' face='Arial ITC'>" + DataFalecimento + "</font></div>");
+				document.write("</div></div>");
+				left = l + 530;
+				top = t + 80;
+				document.write("<div id='text1" + i + "' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:461px; height:450px; z-index:5'>");
+				document.write("<div class='wpmd'>");
+				Foracao = Comments.split(/[\n\r]+/);
+				for (var j = 0; j < Foracao.length; j++) {
+					/* document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>"+Foracao[j]+"</font></div>");*/
+					document.write("<div><font class='ws16' style='font-size:23px' color='#3366FF' face='Arial ITC'>" + Foracao[j] + "</font></div>");
+					document.write("<div><font color='#3366FF' face='Arial ITC'><BR></font></div>");
+				}
+				document.write("</div></div>");
+
+			}
+			document.close();
+			window.print();
+		}
+
+		function Pagina1_BACK() {
+			Index = document.F.Freg.selectedIndex;
+			Freguesia = document.F.Freg.options[Index].text;
+			MyImagem = Freguesia;
+			MyImagem += ".jpg";
+			Index = document.F.Moldura.selectedIndex;
+			Moldura = document.F.Moldura.options[Index].text;
+			//alert(Moldura);	
+			document.write("<style type='text/css' media='print'>");
+			document.write("      body { font: 12pt Times, serif; margin: 0px 0px 0px 0px; }");
+			document.write("</style>");
+
+
+			// SIDE A
+
+
+			document.write("<div id='image1' style='position:absolute; overflow:hidden; left:74px; top:84px; width:235px; height:189px; z-index:0'><img src='imagens/Logotipo.jpg' border=0 width=235 height=189></a></div>");
+
+			document.write("<div id='text1' style='position:absolute; overflow:hidden; left:38px; top:301px; width:306px; height:140px; z-index:1'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div align=center><BR></div>");
+			document.write("<div align=center><font class='ws11'><B>Agencia Funeraria Ilha Azul, Lda</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Estrada Principe Alberto de M�naco ,14</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Angustias - 9900 - 038 Horta</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B><BR></B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Tef./Fax: 292 293 296</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Telemovel: 962 695 212 </B></font></div>");
+			document.write("</div></div>");
+
+
+
+			switch (Moldura) {
+				case 'Moderno':
+					document.write("<div id='image3' style='position:absolute; overflow:hidden; left:482px; top:106px; width:216px; height:325px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/fig_1.bmp' style='position:absolute; overflow:hidden; left:436px; top:15px; width:310px; height:492px;'>");
+					break;
+				case 'Simples':
+					document.write("<div id='image3' style='position:absolute; overflow:hidden; left:444px; top:42px; width:288px; height:450px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/round.gif' style='position:absolute; overflow:hidden; left:438px; top:36px; width:300px; height:462px;'>");
+					break;
+
+			}
+
+
+
+			//document.write("<div id='roundrect1' style='position:absolute; overflow:hidden; left:448px; top:53px; width:288px; height:330px; z-index:3'><img border=0 src='imagens/round.gif'></div>");
+
+			document.write("<div id='image2' style='position:absolute; overflow:hidden; left:74px; top:648px; width:235px; height:189px; z-index:4'><img src='imagens/Logotipo.jpg' border=0 width=235 height=189></a></div>");
+
+			document.write("<div id='text2' style='position:absolute; overflow:hidden; left:38px; top:865px; width:306px; height:140px; z-index:5'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div align=center><BR></div>");
+			document.write("<div align=center><font class='ws11'><B>Agencia Funeraria Ilha Azul, Lda</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Estrada Principe Alberto de Mónaco ,14</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Angustias - 9900 - 038 Horta</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B><BR></B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Tef./Fax: 292 293 296</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Telemovel: 962 695 212 </B></font></div>");
+			document.write("</div></div>");
+
+
+
+
+			switch (Moldura) {
+				case 'Moderno':
+					document.write("<div id='image5' style='position:absolute; overflow:hidden; left:482px; top:670px; width:216px; height:325px; z-index:6'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/fig_1.bmp' style='position:absolute; overflow:hidden; left:436px; top:579px; width:310px; height:492px;'>");
+					break;
+				case 'Simples':
+					document.write("<div id='image3' style='position:absolute; overflow:hidden; left:444px; top:602px; width:288px; height:450px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/round.gif' style='position:absolute; overflow:hidden; left:438px; top:596px; width:300px; height:462px;'>");
+					break;
+
+			}
+
+			//SIDE B
+
+
+			document.write("<div id='image1' style='position:absolute; overflow:hidden; left:886px; top:84px; width:235px; height:189px; z-index:0'><img src='imagens/Logotipo.jpg' border=0 width=235 height=189></a></div>");
+
+			document.write("<div id='text1' style='position:absolute; overflow:hidden; left:850px; top:301px; width:306px; height:140px; z-index:1'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div align=center><BR></div>");
+			document.write("<div align=center><font class='ws11'><B>Agencia Funeraria Ilha Azul, Lda</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Estrada Principe Alberto de M�naco ,14</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Angustias - 9900 - 038 Horta</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B><BR></B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Tef./Fax: 292 293 296</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Telemovel: 962 695 212 </B></font></div>");
+			document.write("</div></div>");
+
+
+
+			switch (Moldura) {
+				case 'Moderno':
+					document.write("<div id='image3' style='position:absolute; overflow:hidden; left:1294px; top:106px; width:216px; height:325px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/fig_1.bmp' style='position:absolute; overflow:hidden; left:1248px; top:15px; width:310px; height:492px;'>");
+					break;
+				case 'Simples':
+					document.write("<div id='image3' style='position:absolute; overflow:hidden; left:1256px; top:42px; width:288px; height:450px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/round.gif' style='position:absolute; overflow:hidden; left:1250px; top:36px; width:300px; height:462px;'>");
+					break;
+
+			}
+
+
+			//document.write("<div id='roundrect1' style='position:absolute; overflow:hidden; left:448px; top:53px; width:288px; height:330px; z-index:3'><img border=0 src='imagens/round.gif'></div>");
+
+			document.write("<div id='image2' style='position:absolute; overflow:hidden; left:886px; top:648px; width:235px; height:189px; z-index:4'><img src='imagens/Logotipo.jpg' border=0 width=235 height=189></a></div>");
+
+			document.write("<div id='text2' style='position:absolute; overflow:hidden; left:850px; top:865px; width:306px; height:140px; z-index:5'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div align=center><BR></div>");
+			document.write("<div align=center><font class='ws11'><B>Agencia Funeraria Ilha Azul, Lda</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Estrada Principe Alberto de M�naco ,14</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Angustias - 9900 - 038 Horta</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B><BR></B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Tef./Fax: 292 293 296</B></font></div>");
+			document.write("<div align=center><font class='ws11'><B>Telemovel: 962 695 212 </B></font></div>");
+			document.write("</div></div>");
+
+
+			switch (Moldura) {
+				case 'Moderno':
+					document.write("<div id='image5' style='position:absolute; overflow:hidden; left:1294px; top:670px; width:216px; height:325px; z-index:6'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/fig_1.bmp' style='position:absolute; overflow:hidden; left:1248px; top:579px; width:310px; height:492px;'>");
+					break;
+				case 'Simples':
+					document.write("<div id='image3' style='position:absolute; overflow:hidden; left:1256px; top:602px; width:288px; height:450px; z-index:2'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");
+					document.write("<img border=0 src='imagens/round.gif' style='position:absolute; overflow:hidden; left:1250px; top:596px; width:300px; height:462px;'>");
+					break;
+
+			}
+
+			document.close();
+			window.print();
+		}
+
+		function Pagina2_back() {
+			Index = document.F.Freg.selectedIndex;
+			Fnome = document.F.Nome.value;
+			Fotografia = "../Agencia/Fotos/" + Fnome + ".jpg"
+			//Fotografia = "Fotos/" + Fnome + ".jpg"
+			Index = document.F.Nday.selectedIndex;
+			Dia = document.F.Nday.options[Index].text;
+			Index = document.F.Nmonth.selectedIndex;
+			Mes = document.F.Nmonth.options[Index].text;
+			Index = document.F.Nyear.selectedIndex;
+			Ano = document.F.Nyear.options[Index].text;
+			DataNascimento = "Nasceu a " + Dia + " de " + Mes + " de " + Ano;
+			Index = document.F.Fday.selectedIndex;
+			Dia = document.F.Fday.options[Index].text;
+			Index = document.F.Fmonth.selectedIndex;
+			Mes = document.F.Fmonth.options[Index].text;
+			Index = document.F.Fyear.selectedIndex;
+			Ano = document.F.Fyear.options[Index].text;
+			DataFalecimento = "e Faleceu a " + Dia + " de " + Mes + " de " + Ano;
+
+			//SIDE A
+
+			document.write("<div id='text2' style='position:absolute; overflow:hidden; left:90px; top:340px; width:425px; height:42px; z-index:0'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Fnome + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text4' style='position:absolute; overflow:hidden; left:55px; top:310px; width:425px; height:42px; z-index:1'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>Orai pela Alma de :</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text5' style='position:absolute; overflow:hidden; left:90px; top:370px; width:425px; height:47px; z-index:2'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataNascimento + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text6' style='position:absolute; overflow:hidden; left:90px; top:400px; width:425px; height:47px; z-index:3'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataFalecimento + "</font></div>");
+			document.write("</div></div>");
+			document.write("<div id='Fotografia1' style='position:absolute; overflow:hidden; left:70px; top:60px; width:220px; height:220px; z-index:4'><img border=0 src='" + Fotografia + "' border=0 width=220 height=220></a></div>");
+
+			document.write("<div id='text1' style='position:absolute; overflow:hidden; left:430px; top:90px; width:461px; height:420px; z-index:5'>");
+			document.write("<div class='wpmd'>");
+			Foracao = Comments.split(/[\n\r]+/);
+			for (var j = 0; j < Foracao.length; j++) {
+				document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Foracao[j] + "</font></div>");
+				document.write("<div><font color='#3366FF' face='Arial ITC'><BR></font></div>");
+			}
+			document.write("</div></div>");
+
+			document.write("<div id='text3' style='position:absolute; overflow:hidden; left:90px; top:908px; width:425px; height:42px; z-index:6'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Fnome + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text7' style='position:absolute; overflow:hidden; left:55px; top:878px; width:425px; height:42px; z-index:7'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>Orai pela Alma de:</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text8' style='position:absolute; overflow:hidden; left:90px; top:938px; width:425px; height:47px; z-index:8'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataNascimento + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text9' style='position:absolute; overflow:hidden; left:90px; top:968px; width:425px; height:47px; z-index:9'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataFalecimento + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='Fotografia2' style='position:absolute; overflow:hidden; left:70px; top:628px; width:220px; height:220px; z-index:10'><img border=0 src='" + Fotografia + "' border=0 width=220 height=220></a></div>");
+
+			document.write("<div id='text10' style='position:absolute; overflow:hidden; left:430px; top:657px; width:461px; height:420px; z-index:11'>");
+			document.write("<div class='wpmd'>");
+			Foracao = Comments.split(/[\n\r]+/);
+			for (var j = 0; j < Foracao.length; j++) {
+				document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Foracao[j] + "</font></div>");
+				document.write("<div><font color='#3366FF' face='Arial ITC'><BR></font></div>");
+			}
+			document.write("</div></div>");
+
+			//SIDE B
+
+			document.write("<div id='text2' style='position:absolute; overflow:hidden; left:902px; top:340px; width:425px; height:42px; z-index:0'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Fnome + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text4' style='position:absolute; overflow:hidden; left:867px; top:310px; width:425px; height:42px; z-index:1'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>Orai pela Alma de :</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text5' style='position:absolute; overflow:hidden; left:902px; top:370px; width:425px; height:47px; z-index:2'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataNascimento + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text6' style='position:absolute; overflow:hidden; left:902px; top:400px; width:425px; height:47px; z-index:3'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataFalecimento + "</font></div>");
+			document.write("</div></div>");
+			document.write("<div id='Fotografia1' style='position:absolute; overflow:hidden; left:882px; top:60px; width:220px; height:220px; z-index:4'><img border=0 src='" + Fotografia + "' border=0 width=220 height=220></a></div>");
+
+			document.write("<div id='text1' style='position:absolute; overflow:hidden; left:1242px; top:90px; width:461px; height:420px; z-index:5'>");
+			document.write("<div class='wpmd'>");
+			Foracao = Comments.split(/[\n\r]+/);
+			for (var j = 0; j < Foracao.length; j++) {
+				document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Foracao[j] + "</font></div>");
+				document.write("<div><font color='#3366FF' face='Arial ITC'><BR></font></div>");
+			}
+			document.write("</div></div>");
+
+			document.write("<div id='text3' style='position:absolute; overflow:hidden; left:902px; top:908px; width:425px; height:42px; z-index:6'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Fnome + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text7' style='position:absolute; overflow:hidden; left:867px; top:878px; width:425px; height:42px; z-index:7'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>Orai pela Alma de:</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text8' style='position:absolute; overflow:hidden; left:902px; top:938px; width:425px; height:47px; z-index:8'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataNascimento + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='text9' style='position:absolute; overflow:hidden; left:902px; top:968px; width:425px; height:47px; z-index:9'>");
+			document.write("<div class='wpmd'>");
+			document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + DataFalecimento + "</font></div>");
+			document.write("</div></div>");
+
+			document.write("<div id='Fotografia2' style='position:absolute; overflow:hidden; left:882px; top:628px; width:220px; height:220px; z-index:10'><img border=0 src='" + Fotografia + "' border=0 width=220 height=220></a></div>");
+
+			document.write("<div id='text10' style='position:absolute; overflow:hidden; left:1242px; top:657px; width:461px; height:420px; z-index:11'>");
+			document.write("<div class='wpmd'>");
+			Foracao = Comments.split(/[\n\r]+/);
+			for (var j = 0; j < Foracao.length; j++) {
+				document.write("<div><font class='ws16' color='#3366FF' face='Arial ITC'>" + Foracao[j] + "</font></div>");
+				document.write("<div><font color='#3366FF' face='Arial ITC'><BR></font></div>");
+			}
+			document.write("</div></div>");
+
+			document.close();
+			window.print();
+			//history.go(-1)
+		}
+
+		function Pagina3() {
+			Index = document.F.Freg.selectedIndex;
+			Fnome = document.F.Nome.value;
+			Fotografia = "C:/Documents and Settings/Administrador/Os meus documentos/As minhas imagens/Fotos/" + Fnome + ".jpg"
+			Index = document.F.Nday.selectedIndex;
+			Dia = document.F.Nday.options[Index].text;
+			Index = document.F.Nmonth.selectedIndex;
+			Mes = document.F.Nmonth.options[Index].text;
+			Index = document.F.Nyear.selectedIndex;
+			Ano = document.F.Nyear.options[Index].text;
+			DataNascimento = Dia + " " + Mes.substr(0, 3) + ". " + Ano;
+			Index = document.F.Fday.selectedIndex;
+			Dia = document.F.Fday.options[Index].text;
+			Index = document.F.Fmonth.selectedIndex;
+			Mes = document.F.Fmonth.options[Index].text;
+			Index = document.F.Fyear.selectedIndex;
+			Ano = document.F.Fyear.options[Index].text;
+			DataFalecimento = Dia + " " + Mes.substr(0, 3) + ". " + Ano;
+
+			document.write("<div id='cartao1' style='position:absolute; overflow:hidden; left:10px; top:100px;width:670px; height:400px;' >");
+			document.write("<div id='image4' style='position:absolute; overflow:hidden; left:70px; top:10px; width:600px; height:400px; z-index:0'><img src='imagens/background.jpg' border=0 width=100% height=100%></div>");
+
+
+			document.write("<div style='position:absolute; overflow:hidden; left:150px; top:70px;z-index:1'>");
+			document.write("	  <table border =0>");
+			document.write("	     <tr>");
+			document.write("		<td align= center width = 160 >");
+			document.write("		      <font style='font-size: 18px;' face='Monotype Corsiva' color='#6A5ACD'><b>" + Fnome + "</b></font>");
+			document.write("		</td>");
+			document.write("	     </tr>");
+			document.write("	  </table>");
+			document.write("	</div>");
+
+			document.write("<div id='Fotografia2' style='position:absolute; overflow:hidden; left:170px; top:115px; width:120px; height:140px; z-index:2'><img border=0 src='" + Fotografia + "' border=0 width=100% height=100%></a></div>");
+
+			document.write("<div style='position:absolute; overflow:hidden; left:165px; top:250px;z-index:3'>");
+			document.write("	  <table border =0>");
+			document.write("	     <tr>");
+			document.write("		<td align= right width = 100 >");
+			document.write("		    <font class='ws15' face='Monotype Corsiva' color='#6A5ACD'>");
+			document.write("		      <p style='line-height: 5%;'><br>");
+			document.write("		      <p style='line-height: 5%;'><b>" + DataNascimento);
+			document.write("                      <p style='line-height: 5%;'><b>" + DataFalecimento + "</b>");
+			document.write("		      <p style='line-height: 5%;'><br>");
+			document.write("                    </font>");
+			document.write("		</td>");
+			document.write("	     </tr>");
+			document.write("	  </table>");
+			document.write("	</div>");
+
+			document.write("<div id='text10' style='position:absolute; overflow:hidden; left:340px; top:50px; width:360px; height:440px; z-index:4'>");
+			document.write("	  <table border =0>");
+			document.write("	     <tr valign= center>");
+			document.write("		<td align= left width = 100%  height=280 >");
+			document.write("                <font style='font-size: 14px;' color='#6A5ACD' face='Monotype Corsiva'><b>");
+			document.write("		      <p style='line-height: 5%;'><br>");
+
+			Foracao = Comments.split(/[\n\r]+/);
+			for (var j = 0; j < Foracao.length; j++) {
+				document.write("<p style='line-height: 30%;'>" + Foracao[j]);
+			}
+			document.write("</b></font></p>");
+			document.write("		</td>");
+			document.write("	     </tr>");
+
+			document.write("	  </table>");
+			document.write("	</div>");
+
+			document.write("<div id='image2' style='position:absolute; overflow:hidden; left:525px; top:285px; width:60px; height:50px; z-index:5'><img src='imagens/Logotipo.jpg' border=0 width=100% height=100%></div>");
+			document.write("</div>");
+
+
+			document.write("<div id='cartao2' style='position:absolute; overflow:hidden; left:10px; top:600px;width:670px; height:400px;' >");
+			document.write("<div id='image4' style='position:absolute; overflow:hidden; left:70px; top:10px; width:600px; height:400px; z-index:0'><img src='imagens/background.jpg' border=0 width=100% height=100%></div>");
+
+
+			document.write("<div style='position:absolute; overflow:hidden; left:150px; top:70px;z-index:1'>");
+			document.write("	  <table border =0>");
+			document.write("	     <tr>");
+			document.write("		<td align= center width = 160 >");
+			document.write("		      <font style='font-size: 18px;' face='Monotype Corsiva' color='#6A5ACD'><b>" + Fnome + "</b></font>");
+			document.write("		</td>");
+			document.write("	     </tr>");
+			document.write("	  </table>");
+			document.write("	</div>");
+
+			document.write("<div id='Fotografia2' style='position:absolute; overflow:hidden; left:170px; top:115px; width:120px; height:140px; z-index:2'><img border=0 src='" + Fotografia + "' border=0 width=100% height=100%></a></div>");
+
+			document.write("<div style='position:absolute; overflow:hidden; left:165px; top:250px;z-index:3'>");
+			document.write("	  <table border =0>");
+			document.write("	     <tr>");
+			document.write("		<td align= right width = 100 >");
+			document.write("		    <font class='ws15' face='Monotype Corsiva' color='#6A5ACD'>");
+			document.write("		      <p style='line-height: 5%;'><br>");
+			document.write("		      <p style='line-height: 5%;'><b>" + DataNascimento);
+			document.write("                      <p style='line-height: 5%;'><b>" + DataFalecimento + "</b>");
+			document.write("		      <p style='line-height: 5%;'><br>");
+			document.write("                    </font>");
+			document.write("		</td>");
+			document.write("	     </tr>");
+			document.write("	  </table>");
+			document.write("	</div>");
+
+			document.write("<div id='text10' style='position:absolute; overflow:hidden; left:340px; top:50px; width:360px; height:440px; z-index:4'>");
+			document.write("	  <table border =0>");
+			document.write("	     <tr valign= center>");
+			document.write("		<td align= left width = 100%  height=280 >");
+			document.write("                <font style='font-size: 14px;' color='#6A5ACD' face='Monotype Corsiva'><b>");
+			document.write("		      <p style='line-height: 5%;'><br>");
+
+			Foracao = Comments.split(/[\n\r]+/);
+			for (var j = 0; j < Foracao.length; j++) {
+				document.write("<p style='line-height: 30%;'>" + Foracao[j]);
+			}
+			document.write("</b></font></p>");
+			document.write("		</td>");
+			document.write("	     </tr>");
+
+			document.write("	  </table>");
+			document.write("	</div>");
+
+			document.write("<div id='image2' style='position:absolute; overflow:hidden; left:525px; top:285px; width:60px; height:50px; z-index:5'><img src='imagens/Logotipo.jpg' border=0 width=100% height=100%></div>");
+			document.write("</div>");
+
+
+			document.close();
+			window.print();
+
+		}
+
+		function Pagina4() {
+			Index = document.F.Freg.selectedIndex;
+			Freguesia = document.F.Freg.options[Index].text;
+			MyImagem = Freguesia;
+			MyImagem += ".jpg";
+			Index = document.F.Moldura.selectedIndex;
+			Moldura = document.F.Moldura.options[Index].text;
+			//alert(Moldura);	
+			document.write("<style type='text/css' media='print'>");
+			document.write("      body { font: 12pt Times, serif; margin: 0px 0px 0px 0px; }");
+			document.write("</style>");
+
+
+			// SIDE A
+			document.write("<div id='image1' style='position:absolute; overflow:hidden; left:95px; top:68px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+			document.write("<div id='image2' style='position:absolute; overflow:hidden; left:440px; top:68px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+			document.write("<div id='image3' style='position:absolute; overflow:hidden; left:785px; top:68px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+			document.write("<div id='image4' style='position:absolute; overflow:hidden; left:1130px; top:68px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+			document.write("<div id='image5' style='position:absolute; overflow:hidden; left:95px; top:609px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+			document.write("<div id='image6' style='position:absolute; overflow:hidden; left:440px; top:609px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+			document.write("<div id='image7' style='position:absolute; overflow:hidden; left:785px; top:609px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+			document.write("<div id='image8' style='position:absolute; overflow:hidden; left:1130px; top:609px; width:344px; height:539px; z-index:6'><img src='imagens/" + MyImagem + "' border=1 width=90% height=90%></div>");
+
+			document.close();
+			window.print();
+		}
+
+		function Pagina5() {
+			Index = document.F.Freg.selectedIndex;
+			Fnome = document.F.Nome.value;
+			Fotografia = "../Agencia/Fotos/" + Fnome + ".jpg"
+			Index = document.F.Freg.selectedIndex;
+			Freguesia = document.F.Freg.options[Index].text;
+			MyImagem = Freguesia;
+			MyImagem += ".jpg";
+
+			//Fotografia = "Fotos/" + Fnome + ".jpg"
+			Index = document.F.Nday.selectedIndex;
+			Dia = document.F.Nday.options[Index].text;
+			Index = document.F.Nmonth.selectedIndex;
+			Mes = document.F.Nmonth.options[Index].text;
+			Index = document.F.Nyear.selectedIndex;
+			Ano = document.F.Nyear.options[Index].text;
+			DataNascimento = "Nasceu a " + Dia + " de " + Mes + " de " + Ano;
+			Index = document.F.Fday.selectedIndex;
+			Dia = document.F.Fday.options[Index].text;
+			Index = document.F.Fmonth.selectedIndex;
+			Mes = document.F.Fmonth.options[Index].text;
+			Index = document.F.Fyear.selectedIndex;
+			Ano = document.F.Fyear.options[Index].text;
+			DataFalecimento = "Faleceu a " + Dia + " de " + Mes + " de " + Ano;
+			var aleft = new Array(3);
+			aleft[0] = 365;
+			aleft[1] = 203;
+			aleft[2] = 114;
+
+			var j = 0;
+			var k = 50;
+			var left = 0;
+			var top = 0;
+
+
+			for (var i = 0; i < 8; i++) {
+				j = i;
+				k = 50;
+				if (i >= 4) {
+					j = i - 4;
+					k = 590;
+				}
+				left = aleft[0] + j * 340;
+				top = k + 435;
+				document.write("<div id='image2' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:90px; height:75px; z-index:5'><img src='imagens/Logotipo.jpg' border=0 width=100% height=100%></div>");
+				left = aleft[1] + j * 345;
+				top = k;
+				document.write("<div id='Fotografia1' style='position:absolute; overflow:hidden; left:" + left + "px; top:" + top + "px; width:170px; height:170px; z-index:4'><img border=0 src='" + Fotografia + "' border=0 width=170 height=170></a></div>");
+				left = aleft[2] + j * 345;
+				top = k + 180;
+				document.write("<div id='text2' style='position:absolute; overflow:hidden; text-align: center; left:" + left + "px; top:" + top + "px; width:344px; height:42px; z-index:0'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div><font class='ws16' color='#000000' face='Arial ITC'>" + Fnome + "</font></div>");
+				document.write("</div></div>");
+				top = k + 220;
+				document.write("<div id='text5' style='position:absolute; overflow:hidden; text-align: center; left:" + left + "px; top:" + top + "px; width:344px; height:47px; z-index:2'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div><font class='ws16' color='#000000' face='Arial ITC'>" + DataNascimento + "</font></div>");
+				document.write("</div></div>");
+				top = k + 240;
+				document.write("<div id='text6' style='position:absolute; overflow:hidden; text-align: center; left:" + left + "px; top:" + top + "px; width:344px; height:47px; z-index:3'>");
+				document.write("<div class='wpmd'>");
+				document.write("<div><font class='ws16' color='#000000' face='Arial ITC'>" + DataFalecimento + "</font></div>");
+				document.write("</div></div>")
+				top = k + 280;
+				document.write("<div id='text1' style='position:absolute; overflow:hidden; text-align: center;  left:" + left + "px; top:" + top + "px; width:344px; height:344px; z-index:5'>");
+				document.write("<div class='wpmd'>");
+				Foracao = Comments.split(/[\n\r]+/);
+				for (var j = 0; j < Foracao.length; j++) {
+					document.write("<div><font class='ws16' color='#000000' face='Arial ITC'>" + Foracao[j] + "</font></div>");
+				}
+				document.write("</div></div>");
+			}
+			//document.write("<div id='image1' style='position:absolute; overflow:hidden; left:95px; top:15px; width:344px; height:544px; z-index:6'><img src='imagens/" + MyImagem + "' border=0 width=100% height=100%></div>");	
+			document.close();
+			window.print();
+			//history.go(-1)
+		}
+
+		// Atualizar a caixa de texto
+		function fillTextArea() {
+			var C_Oracao = document.F.Oracao.options[document.F.Oracao.selectedIndex].text;
+			var i = 0;
+			while (Oracoes[i][0] != C_Oracao) {
+				i++;
+			}
+			var str = "";
+			var temp = "";
+			for (var j = 0; j < Oracoes[i][1].length; j++) {
+				temp = Oracoes[i][1][j];
+				str += temp.replace(/^\s+|\s+$/g, "") + "\n" + "\n";
+			}
+			document.F.Comments.value = str;
+			Comments = str;
+		}
+
+		// Atualizar comentários
+		function setComments() {
+			Comments = document.F.Comments.value;
+		}
+
+		// ----
+		function facebook(action) {
+
+			Index = document.F.Freg.selectedIndex;
+			Fnome = document.F.Nome.value;
+
+			// new (cross-origin)
+			/* let person_image = new Image();
+			person_image.crossOrigin = "anonymous";
+			person_image.src = "Fotos/" + Fnome + ".jpg" */
+			// old
+			Fotografia = "Fotos/" + Fnome + ".jpg"
+
+			
+
+			//Fotografia = "Fotos/" + Fnome + ".jpg"
+			Index = document.F.Nday.selectedIndex;
+			Dia = document.F.Nday.options[Index].text;
+			Index = document.F.Nmonth.selectedIndex;
+			Mes = document.F.Nmonth.options[Index].text;
+			Index = document.F.Nyear.selectedIndex;
+			Ano = document.F.Nyear.options[Index].text;
+			DataNascimento = "" + Dia + " de " + Mes + " de " + Ano;
+			Index = document.F.Fday.selectedIndex;
+			Dia = document.F.Fday.options[Index].text;
+			Index = document.F.Fmonth.selectedIndex;
+			Mes = document.F.Fmonth.options[Index].text;
+			Index = document.F.Fyear.selectedIndex;
+			Ano = document.F.Fyear.options[Index].text;
+			DataFalecimento = "" + Dia + " de " + Mes + " de " + Ano;
+
+			// Oração / texto de acompanhamento
+			Texto = document.F.Comments.value;
+
+			// Dia da missa
+			Dia = document.F.Mday.value;
+			Hora = document.F.Mhour.value;
+			Local = document.F.Mplace.value;
+			DataMissa = "A cerimónia fúnebre será " + Dia + " pelas " + Hora + "<br>Local: " + Local;
+			
+
+
+			//alert(Moldura);	
+
+			document.write(`
+			<style type='text/css'>
+				body { font: 12pt "Niconne", sans-serif, serif; margin: 0px 0px 0px 0px; }
+				
+				@font-face {
+					font-family: "Niconne";
+					src: url("assets/fonts/Niconne-Regular.ttf");
+				}
+
+				@font-face {
+					font-family: "Dosis";
+					src: url("assets/fonts/Dosis.ttf");
+				}
+
+				@font-face {
+					font-family: "Garamont";
+					src: url("assets/fonts/GaramontAmsterdamBQ.otf");
+				}
+
+				.person-name {
+					font-weight: normal;
+					
+					font-family: 'Garamont', sans-serif;
+				}
+
+				canvas { width: 3508px; height: 2480px; }
+
+				.paper {
+					width: 3508px;
+					height: 2480px;
+
+					max-width: 3508px;
+					max-height: 2480px;
+				}
+
+				.left{
+					float:left;
+
+					background: #2A3B55;
+					color: #FDF5C6;
+
+					font-size: 110px;
+
+					overflow: hidden;
+					
+					width: 50%; 
+					height: 100%;
+					
+				}
+
+				.left-inner {
+
+					margin: 5%;
+
+					position: relative;
+
+					width; 100%;
+					height: calc(2480px - 9%);
+
+					padding: 0% 5%;
+					border: 8px solid #FDF5C6;
+				}
+
+				.right {
+					float: right;
+
+					overflow: hidden;
+					
+					width: 50%; 
+					height: 100%;
+					
+				}
+
+				.info-missa {
+					
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					width: 100%;
+
+					margin-bottom: 3%;
+
+					text-align: center;
+					font-size: 60%; 
+					font-family: 'Dosis';
+					
+				}
+
+				.warning {
+					
+					opacity: 0.8;
+					font-size: 60%; 
+					font-family: 'Dosis';
+					
+				}
+
+
+			</style>`);
+
+			document.write(`
+			<div class="paper">
+				<div class="left" align=center>
+					<div class="left-inner">
+						<p class="warning">INFORMAÇÃO DE FALECIMENTO</p>
+						<h2 class="person-name">`+ Fnome + `</h2>
+						<p style="font-size: 70%">`+ DataNascimento + ` - `+ DataFalecimento + `</p>
+						<p>`+ Texto +`</p>
+
+						<br>
+
+						<div class="info-missa">
+							`+ DataMissa +`
+						</div>
+			
+					</div>
+				</div>
+				<div class="right" align=center style="position: relative; background-image: url('`+ "Fotos/" + Fnome + ".jpg" + `'); background-repeat: no-repeat; background-size: 115% 100%;">
+					<!-- <img style="position: absolute; bottom: 7em; right: 7em; width: 17em; height: 15em;" src="assets/i/logo.svg"> -->	
+					<img style="position: absolute; bottom: 5em; right: 5em; width: 17em; height: 15em;" src="Logotipo.jpg">
+				</div>
+			</div>
+				`);
+
+
+			// "Fotos/" + Fnome + ".jpg"
+
+
+			/* var canvas = document.getElementById("c_facebook");
+			var context = canvas.getContext("2d");
+			context.fillStyle = "white";
+			context.font = "bold 18px Arial";
+			context.fillText("Testing text \n <br>", (canvas.width / 2) - 17, (canvas.height / 2) + 8);
+				*/
+
+			if(action == 'download'){
+				html2canvas(document.querySelector(".paper")/* , { allowTaint : false, useCORS: true}  */).then(canvas => {
+					//document.body.innerHTML = "";
+					//document.body.inner(canvas);
+
+					//document.close();
+					//window.print();
+
+					//publishToFacebook();
+
+					/* DOWNLOAD AS PIC */
+					
+					/* var downloadLink = document.createElement('a');
+					downloadLink.href = canvas.toDataURL();
+					downloadLink.download = Fnome + "_facebook.png";
+
+					document.body.appendChild(downloadLink);
+					downloadLink.click();
+					document.body.removeChild(downloadLink); */
+
+					// OR
+
+					// a.target = "_self";
+
+					/* var a = document.createElement('a');
+					
+					a.href = canvas.toDataURL();
+					a.download = Fnome + "_facebook.png";
+					
+					a.click();
+					a.delete;  */
+
+					var anchor = document.createElement("a");
+					anchor.crossorigin= "anonymous";
+					anchor.href = canvas.toDataURL("");
+					anchor.target = "_self";
+					anchor.download = Fnome + "_facebook-image.png";
+					anchor.click();
+					anchor.delete;
+
+					alert("Clique confirmar para fazer download")
+				
+				});
+			}
+			else if(action == 'post'){
+				html2canvas(document.querySelector(".paper")).then(canvas => {
+
+					page_id = "103832712344815";
+					authToken = "EAAUTRZA1hAdEBAKS4XBZAngApFxLhUOkZAdpfezGIobuZCLUOHdOoqCngg2FS2A8Loa12ZBWyBtxSh8uy3ZCu574ex1CjdGufjImeSZAW8FBKo4MvbSBp2wboeZAJ2yLdEtYpLIFEcylHNXGTuNkwrEcxhjDO0RZBQeraBeTlWVHHHWRdW135fO7A0WgfXTGG71IZD";
+			
+					// --------------------------
+
+				
+					facebook_post_text = 'Faleceu '+Fnome+' ('+DataNascimento + ` - `+ DataFalecimento+') | '+DataMissa;
+
+					// ---------------------------
+
+					function dataURItoBlob(dataURI) {
+						var byteString = atob(dataURI.split(',')[1]);
+						var ab = new ArrayBuffer(byteString.length);
+						var ia = new Uint8Array(ab);
+						for (var i = 0; i < byteString.length; i++) {
+							ia[i] = byteString.charCodeAt(i);
+						}
+						return new Blob([ab], { type: 'image/png' });
+					}
+
+					var imageData  = canvas.toDataURL("image/png");
+					try {
+						blob = dataURItoBlob(imageData);
+					}
+					catch(e) {
+						console.log(e);
+					}
+					var fd = new FormData();
+					fd.append("access_token",authToken);
+					fd.append("source", blob);
+					fd.append("message",facebook_post_text);
+					try {
+						$.ajax({
+							
+							// test_endpoint = "https://graph.facebook.com/"+page_id+"/photos?url="+url_to_photo+"&access_token="+token_page_long_lived;
+							
+							url:"https://graph.facebook.com/"+page_id+"/photos?access_token=" + authToken,
+							
+
+							type:"POST",
+							data:fd,
+							processData:false,
+							contentType:false,
+							cache:false,
+							success:function(data){
+								console.log(data);
+							},
+							error:function(shr,status,data){
+								console.log("error " + data + " Status " + shr.status);
+							},
+							complete:function(){
+								console.log("Posted to facebook");
+								alert("Imagem foi postada com sucesso no Facebook. 	✅")
+							}
+						});
+					}
+					catch(e) {
+						console.log(e);
+					}
+
+				});
+			}
+			else {
+				alert('Where to go now? Check parms of facebook()')
+			}
+			
+
+
+		}
+
+
+		function getTokens() {
+
+
+			// IA = Ilha Azul
+			// IA - App ID: 1428564597604817
+			app_id = "1428564597604817";
+			// IA - App Secret: 72be02712aeb8275080984097a5cee97
+			app_secret = "72be02712aeb8275080984097a5cee97";
+			// IA - Page ID: 103832712344815
+			page_id = "103832712344815";
+			// API Version: "/v13.0/"
+			// copy-pasted token : "EAAUTRZA1hAdEBAKS4XBZAngApFxLhUOkZAdpfezGIobuZCLUOHdOoqCngg2FS2A8Loa12ZBWyBtxSh8uy3ZCu574ex1CjdGufjImeSZAW8FBKo4MvbSBp2wboeZAJ2yLdEtYpLIFEcylHNXGTuNkwrEcxhjDO0RZBQeraBeTlWVHHHWRdW135fO7A0WgfXTGG71IZD"
+
+
+
+
+			// ============================
+			// 1. GET SHORT LIVED USER TOKEN HERE
+			// 		FB Query explorer
+			// 		https://developers.facebook.com/tools/explorer?method=GET&path=me%3Ffields%3Did%2Cname&version=v13.0
+			// Token : 
+
+			// IA - Facebook user acess token
+			user_short_token = "EAAUTRZA1hAdEBALEmvvZCcECbk9qVTA1OYW3u241w32hTDb5Rffq7STZCzQZA0w77uj3alZAZAq5IOgu96jDrIhBFF5vxvlf3yJoi1WjW0mlZA5WtfCU623vn6GbZAE4OK8XQKCqbmtd5MX6fpvt3WC4zDlmyJBivbRvnBLy2eKDOwGRGMyGi7REyvg9GhMUZAzxiLDl9gkToYCFBcMfg47id0udRzRCrCqR13yKVAdJnstciwResVaZA6vaeXsvPXS5oZD";
+
+
+			// ============================
+			// 2. GET LONG LIVED USER TOKEN
+
+			url_long_lived_user_token = "https://graph.facebook.com/v13.0/oauth/access_token?grant_type=fb_exchange_token&client_id="+app_id+"&client_secret="+app_secret+"&fb_exchange_token="+user_short_token;
+
+			fetch(url_long_lived_user_token)
+			.then(function(response) {
+				res = response.json();
+				return res;
+			})
+			.then(function(json){
+
+				token_user_long_lived = json.access_token;
+				console.log("%c User long-lived token:", 'background: #222; color: #bada55', token_user_long_lived);
+
+				
+				// ============================
+				// 3. Get page token via user token (both long-lived)
+				url_long_lived_page_token = "https://graph.facebook.com/"+page_id+"?fields=access_token&access_token="+token_user_long_lived;
+
+				
+				fetch(url_long_lived_page_token)
+				.then(function(response) {
+					res = response.json();
+					return res;
+				})
+				.then(function(json){
+
+					token_page_long_lived = json.access_token;
+					console.log("%c Page long-lived token:", 'background: #222; color: #bada55', token_page_long_lived);
+				
+				});
+
+			});
+
+			
+
+
+
+			// token_page_long_lived = "EAAUTRZA1hAdEBALjumAPp6dTFSZBrWSQNtZBZA9on1qpQLlt472ggQ5ZBXSgsQQp8ZCnKB0sHItdZCRqlScjZCqvn0gJvci2uN7Xo62ajVHgLb1dzip9OxhYeykKEh1ly6wdSdvq04PQUE9MwK5ZCE69FA5Y4RB0Jk4Ku9iTpTp0LMWnhmljf1I8SQY66uZB1ioZBYZD";
+
+
+			// TEST POST TEXT and LINK
+
+			/* test_msg = "Testing a message sent via the Facebook API. You can find more about me at...";
+			test_link = "https://vmedeiros.net/";
+			test_endpoint = "https://graph.facebook.com/"+page_id+"/feed?message="+test_msg+"&link="+test_link+"&access_token="+token_page_long_lived;
+
+			fetch(test_endpoint,{method: "POST"}).then(function(response){
+				console.log(response.json());
+			}); */
+
+
+
+
+
+			// TEST POST PHOTO
+
+			// 10.3.24.36
+
+			/* test_msg = "Testing a message sent via the Facebook API";
+			// http://10.3.24.36/agencia/Fotos/Valter%20Medeiros.JPG
+			// http://10.3.24.36/agencia/Fotos/Valter%20Medeiros
+			url_to_photo = "Fotos/Valter%20Medeiros.JPG";
+			test_endpoint = "https://graph.facebook.com/"+page_id+"/photos?url="+url_to_photo+"&access_token="+token_page_long_lived;
+
+			fetch(test_endpoint,{method: "POST"}).then(function(response){
+				console.log(response.json());
+			}); */
+
+			
+		}
+
+	</script>
+</HEAD>
+
+<BODY class="theme-dark" onLoad='fillTextArea()'>
+
+	<script>
+
+		function changeThemeColor(){
+		
+			if(document.querySelector('body').classList.contains("theme-dark")) {
+				document.querySelector('body').setAttribute('class', 'theme-light');
+			}
+			else {
+				document.querySelector('body').setAttribute('class', 'theme-dark');
+			}
+
+		}
+
+	</script>
+
+	<script language="javascript" type="text/javascript" src="oracoes.js"></script>
+	<script language=javascript>
+
+		var Freguesia = new Array(13);
+		Freguesia[0] = "Angustias";
+		Freguesia[1] = "Capelo";
+		Freguesia[2] = "Castelo Branco";
+		Freguesia[3] = "Cedros";
+		Freguesia[4] = "Conceição";
+		Freguesia[5] = "Feteira";
+		Freguesia[6] = "Flamengos";
+		Freguesia[7] = "Matriz";
+		Freguesia[8] = "Pedro Miguel";
+		Freguesia[9] = "Praia do Almoxarife";
+		Freguesia[10] = "Praia do Norte";
+		Freguesia[11] = "Ribeirinha";
+		Freguesia[12] = "Salão";
+		Freguesia[13] = "Pico";
+
+		var MonthName = new Array(12);
+		MonthName[0] = "Janeiro";
+		MonthName[1] = "Fevereiro";
+		MonthName[2] = "Março";
+		MonthName[3] = "Abril";
+		MonthName[4] = "Maio";
+		MonthName[5] = "Junho";
+		MonthName[6] = "Julho";
+		MonthName[7] = "Agosto";
+		MonthName[8] = "Setembro";
+		MonthName[9] = "Outubro";
+		MonthName[10] = "Novembro";
+		MonthName[11] = "Dezembro";
+
+	</script>
+
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand me-5" href="#">
+				<img src="assets/i/logo.svg" alt="Logo Agência" srcset="assets/i/logo.svg" class="ms-5 mt-2"
+					style="height: 4em;">
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+				data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+							data-bs-toggle="dropdown" aria-expanded="false">
+							<img src="assets/i/icons/print.svg" class="me-2" style="height: 1em;">
+							Imprimir cartões
+						</a>
+						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<li><a class="dropdown-item" href="#" onclick="Pagina1()">Exterior</a></li>
+							<li><a class="dropdown-item" href="#" onclick="Pagina2()">Interior</a></li>
+							<li><a class="dropdown-item" href="#" onclick="Pagina3()">Cartão nº 2</a></li>
+							<li><a class="dropdown-item" href="#" onclick="Pagina4()">Simples Exterior</a></li>
+							<li><a class="dropdown-item" href="#" onclick="Pagina5()">Simples Interior</a></li>
+						</ul>
+					</li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+							data-bs-toggle="dropdown" aria-expanded="false">
+							<img src="assets/i/icons/facebook.svg" class="me-2" style="height: 1em;">
+							Facebook
+						</a>
+						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<li><a class="dropdown-item" href="#" onclick="facebook('download')">Baixar Imagem</a></li>
+							<li><a class="dropdown-item" href="#" onclick="facebook('post')">Publicar imagem</a></li>
+						</ul>
+					</li>
+				</ul>
+				<div class="d-flex">
+					<a class="btn btn-outline-light nav-link" onclick="changeThemeColor()">
+						<img id="theme-icon" src="assets/i/icons/sun.svg" class="me-1" style="height: 1em;">
+					</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+
+
+
+	<div class="container mt-4">
+
+		<form method='GET' action='' name='F'>
+
+			<div class="row">
+				<div class="col">
+					<label>Nome</label>
+					<script>
+						C_Nome = Get_Cookie('Nome');
+						if (C_Nome == null) {
+							C_Nome = "";
+						}
+						document.write("<input  class='wpmd form-control' name='Nome' type='text' value='" + C_Nome + "'>");
+					</script>
+
+					<label>Freguesia</label>
+					<select class='wpmd form-select' name='Freg'>
+						<script>
+							C_freg = Get_Cookie('Freg');
+							for (i = 0; i <= 13; i++) {
+								if (Freguesia[i] == C_freg) {
+									document.write("<OPTION SELECTED> " + Freguesia[i] + "</option>");
+								} else {
+									document.write("<OPTION> " + Freguesia[i] + "</option>");
+								}
+
+							}
+						</script>
+					</select>
+
+					<!-- Data de nascimento -->
+					<div class="row g-3">
+						<div class="col">
+							<label>Dia de nascimento</label>
+							<select class='wpmd form-select' name='Nday'>
+								<script>
+									C_Ndia = Get_Cookie('Ndia');
+									for (i = 1; i <= 31; i++) {
+										if (i == C_Ndia) {
+											document.write("<OPTION SELECTED> " + i + "</option>");
+										} else {
+											document.write("<OPTION> " + i + "</option>");
+										}
+									}
+								</script>
+							</select>
+						</div>
+						<div class="col">
+							<label>Mês de nascimento</label>
+							<select class='wpmd form-select' name='Nmonth'>
+								<script>
+									C_Nmes = Get_Cookie('Nmes');
+									for (i = 0; i <= 11; i++) {
+										if (MonthName[i] == C_Nmes) {
+											document.write("<OPTION SELECTED> " + MonthName[i] + "</option>");
+										} else {
+											document.write("<OPTION> " + MonthName[i] + "</option>");
+										}
+									}
+								</script>
+							</select>
+						</div>
+						<div class="col">
+							<label>Ano de nascimento</label>
+							<select class='wpmd form-select' name='Nyear'>
+								<script>
+									var DataAtual = new Date();
+									var MyAno = DataAtual.getFullYear()
+									C_Nano = Get_Cookie('Nano');
+									for (i = MyAno - 110; i <= MyAno; i++) {
+										if (i == C_Nano) {
+											document.write("<OPTION SELECTED> " + i + "</option>");
+										} else {
+											document.write("<OPTION> " + i + "</option>");
+										}
+									}
+								</script>
+							</select>
+						</div>
+					</div>
+
+					<!-- Data de falecimento -->
+					<div class="row g-3">
+						<div class="col">
+							<label>Dia de falecimento</label>
+							<select class='wpmd form-select' name='Fday'>
+								<script>
+									var C_Fdia = DataAtual.getDate();
+									for (i = 1; i <= 31; i++) {
+										if (i == C_Fdia) {
+											document.write("<OPTION SELECTED> " + i + "</option>");
+										} else {
+											document.write("<OPTION> " + i + "</option>");
+										}
+
+									}
+								</script>
+							</select>
+						</div>
+						<div class="col">
+							<label>Mês de falecimento</label>
+							<select class='wpmd form-select' name='Fmonth'>
+								<script>
+									var C_Fmes = DataAtual.getMonth();
+									//alert(C_Fmes);
+									for (i = 0; i <= 11; i++) {
+										if (i == C_Fmes) {
+											//alert(MonthName[C_Fmes]);
+											document.write("<OPTION SELECTED> " + MonthName[i] + "</option>");
+										} else {
+											document.write("<OPTION> " + MonthName[i] + "</option>");
+										}
+									}
+								</script>
+							</select>
+						</div>
+						<div class="col">
+							<label>Ano de falecimento</label>
+							<select class='wpmd form-select' name='Fyear'>
+								<script>
+									for (i = MyAno - 2; i <= MyAno; i++) {
+										if (i == MyAno) {
+											document.write("<OPTION SELECTED> " + i + "</option>");
+										} else {
+											document.write("<OPTION> " + i + "</option>");
+										}
+									}
+								</script>
+							</select>
+						</div>
+					</div>
+
+					<!-- Missa -->
+					<div class="row g-3">
+						<div class="col">
+							<label>Cerimónia Funebre</label>
+							<select class='wpmd form-select' id="Mday" name='Mday'>
+								<option value="Segunda-feira">Segunda-feira</option>
+								<option value="Terça-feira">Terça-feira</option>
+								<option value="Quarta-feira">Quarta-feira</option>
+								<option value="Quinta-feira">Quinta-feira</option>
+								<option value="Sexta-feira">Sexta-feira</option>
+								<option value="Sábado">Sábado</option>
+								<option value="Domingo">Domingo</option>
+							</select>
+						</div>
+						<div class="col">
+							<label>Hora</label>
+							<input type="text" class="wpmd form-control" placeholder="(hh:mm)" id="Mhour" value="00:00" name='Mhour'>
+						</div>
+						<div class="col">
+							<label>Local</label>
+							<input type="text" class="wpmd form-control" placeholder="(local)" id="Mplace" value="" name='Mplace'>
+						</div>
+					</div>
+
+					<label>Moldura</label>
+					<select class='wpmd form-select' name='Moldura'>
+						<OPTION SELECTED>Simples</option>
+						<OPTION>Moderno</option>
+					</select>
+				</div>
+
+				<div class="col">
+					<label>Oração</label>
+					<select class='wpmd form-select' name='Oracao' onChange='fillTextArea()'>
+						<script>
+							C_Oracao = Get_Cookie('Oracao');
+							for (i = 0; i < Oracoes.length; i++) {
+								if (Oracoes[i][0] == C_Oracao) {
+									document.write("<OPTION SELECTED> " + Oracoes[i][0] + "</option>");
+								} else {
+									document.write("<OPTION> " + Oracoes[i][0] + "</option>");
+								}
+							}
+						</script>
+					</select>
+
+					<label>Editar oração</label>
+					<TEXTAREA class='wpmd form-control ' COLS=60 ROWS=20 id='Comments' NAME='Comments'
+						onChange='setComments()'></TEXTAREA>
+				</div>
+			</div>
+
+		</form>
+
+	</div>
+
+	<!-- <script>
+		document.write("");
+		document.write("<form method='GET' action = '' name='F'> ");
+		C_Nome = Get_Cookie('Nome');
+		if (C_Nome == null) {
+			C_Nome = "";
+		}
+		document.write("<input  class='wpmd form-control' name='Nome' type='text' value='" + C_Nome + "' style='position:absolute;width:263px;left:237px;top:113px;z-index:0'>");
+		document.write("<select  class='wpmd form-select' name='Freg' style='position:absolute;left:237px;top:151px;width:200px;z-index:1'>");
+		C_freg = Get_Cookie('Freg');
+		for (i = 0; i <= 13; i++) {
+			if (Freguesia[i] == C_freg) {
+				document.write("<OPTION SELECTED> " + Freguesia[i] + "</option>");
+			} else {
+				document.write("<OPTION> " + Freguesia[i] + "</option>");
+			}
+
+		}
+		document.write("</select>");
+		document.write("<select  class='wpmd form-select' name='Nmonth' style='position:absolute;width:135px;left:300px;top:190px;z-index:4'>");
+		C_Nmes = Get_Cookie('Nmes');
+		for (i = 0; i <= 11; i++) {
+			if (MonthName[i] == C_Nmes) {
+				document.write("<OPTION SELECTED> " + MonthName[i] + "</option>");
+			} else {
+				document.write("<OPTION> " + MonthName[i] + "</option>");
+			}
+
+		}
+		document.write("</select>");
+		document.write("<select class='wpmd form-select' name='Nday' style='position:absolute;left:237px;top:190px;width:56px;z-index:1'>");
+		C_Ndia = Get_Cookie('Ndia');
+		for (i = 1; i <= 31; i++) {
+			if (i == C_Ndia) {
+				document.write("<OPTION SELECTED> " + i + "</option>");
+			} else {
+				document.write("<OPTION> " + i + "</option>");
+			}
+
+		}
+		document.write("</select>");
+
+		document.write("<select class='wpmd form-select' name='Nyear' style='position:absolute;left:450px;top:190px;width:85px;z-index:2'>");
+		var DataAtual = new Date();
+		var MyAno = DataAtual.getFullYear()
+		C_Nano = Get_Cookie('Nano');
+		for (i = MyAno - 110; i <= MyAno; i++) {
+			if (i == C_Nano) {
+				document.write("<OPTION SELECTED> " + i + "</option>");
+			} else {
+				document.write("<OPTION> " + i + "</option>");
+			}
+		}
+		document.write("</select>");
+
+		document.write("<select  class='wpmd form-select' name='Fmonth' style='position:absolute;width:135px;left:300px;top:229px;z-index:4'>");
+		var C_Fmes = DataAtual.getMonth();
+		//alert(C_Fmes);
+		for (i = 0; i <= 11; i++) {
+			if (i == C_Fmes) {
+				//alert(MonthName[C_Fmes]);
+				document.write("<OPTION SELECTED> " + MonthName[i] + "</option>");
+			} else {
+				document.write("<OPTION> " + MonthName[i] + "</option>");
+			}
+
+		}
+		document.write("</select>");
+
+		document.write("<select class='wpmd form-select' name='Fday' style='position:absolute;left:237px;top:229px;width:56px;z-index:1'>");
+		var C_Fdia = DataAtual.getDate();
+		for (i = 1; i <= 31; i++) {
+			if (i == C_Fdia) {
+				document.write("<OPTION SELECTED> " + i + "</option>");
+			} else {
+				document.write("<OPTION> " + i + "</option>");
+			}
+
+		}
+		document.write("</select>");
+		document.write("<select class='wpmd form-select'  name='Fyear' style='position:absolute;left:450px;top:229px;width:85px;z-index:2'>");
+		for (i = MyAno - 2; i <= MyAno; i++) {
+			if (i == MyAno) {
+				document.write("<OPTION SELECTED> " + i + "</option>");
+			} else {
+				document.write("<OPTION> " + i + "</option>");
+			}
+		}
+		document.write("</select>");
+
+	</script> -->
+
+	<!-- <script language="javascript">
+		document.write("<div id='text1' style='position:absolute; overflow:hidden; left:0px; top:113px; width:220px; height:30px; z-index:6'>");
+		document.write("<div align = 'right' class='wpmd'>");
+		document.write("<div><P><font class='ws12'>Nome</font><P></div>");
+		document.write("</div></div>");
+
+		document.write("<div id='text2' style='position:absolute; overflow:hidden; left:0px; top:151px; width:220px; height:25px; z-index:7'>");
+		document.write("<div align = 'right' class='wpmd'>");
+		document.write("<div><font class='ws12'>Freguesia</font></div>");
+		document.write("</div></div>");
+
+		document.write("<div id='text3' style='position:absolute; overflow:hidden; left:0px; top:189px; width:220px; height:25px; z-index:8'>");
+		document.write("<div align = 'right' class='wpmd'>");
+		document.write("<div><font class='ws12'>Data Nascimento</font></div>");
+		document.write("</div></div>");
+
+		document.write("<div boder = 1 id='text4' style='position:absolute; overflow:hidden; left:0px; top:228px; width:220px; height:25px; z-index:9'>");
+		document.write("<div align = 'right' class='wpmd'>");
+		document.write("<div><font class='ws12'>Data de Falecimento</font></div>");
+		document.write("</div></div>");
+	</script> -->
+
+	<!-- <script>
+		document.write("<div id='text4' style='position:absolute; overflow:hidden; left:0px; top:271px; width:220px; height:25px; z-index:10'>");
+		document.write("<div align = 'right' class='wpmd'>");
+		document.write("<div><font class='ws12'>Oração</font></div>");
+		document.write("</div></div>");
+		document.write("<select class='wpmd form-select' name='Oracao' onChange='fillTextArea()' style='position:absolute;left:237px;top:271px;width:200px;z-index:11'>");
+		C_Oracao = Get_Cookie('Oracao');
+		for (i = 0; i < Oracoes.length; i++) {
+			if (Oracoes[i][0] == C_Oracao) {
+				document.write("<OPTION SELECTED> " + Oracoes[i][0] + "</option>");
+			} else {
+				document.write("<OPTION> " + Oracoes[i][0] + "</option>");
+			}
+
+		}
+		document.write("</select>");
+
+		document.write("<div id='text4' style='position:absolute; overflow:hidden; left:0px; top:314px; width:220px; height:25px; z-index:10'>");
+		document.write("<div align = 'right' class='wpmd'>");
+		document.write("<div><font class='ws12'>Moldura</font></div>");
+		document.write("</div></div>");
+		document.write("<select class='wpmd form-select'  name='Moldura' style='position:absolute;left:237px;top:314px;width:200px;z-index:2'>");
+		document.write("<OPTION SELECTED>Simples</option>");
+		document.write("<OPTION>Moderno</option>");
+		document.write("</select>");
+
+		document.write("<TEXTAREA class='wpmd form-control w-25' COLS=60 ROWS=20 id ='Comments' NAME='Comments' onChange='setComments()' style='position:absolute;left:580px;top:91px;z-index:12'></TEXTAREA> ");
+		document.write("</FORM>");
+		document.close();
+	</script> -->
+
+</BODY>
+
+</HTML>
